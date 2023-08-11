@@ -11,16 +11,19 @@ public class Dice : MonoBehaviour, IDice
     private DiceVisuals visuals;
 
     private DiceManager diceManager;
-    
+
+    public event Action<IDice> OnDiceReadyToRead;
 
     private void OnEnable()
     {
         diceManager.OnRollDice += Roll;
+        controls.OnDiceValueAvailable += NotifyDiceValueAvailable;
     }
     
     private void OnDisable()
     {
         diceManager.OnRollDice -= Roll;
+        controls.OnDiceValueAvailable -= NotifyDiceValueAvailable;
     }
 
     private void Awake()
@@ -69,6 +72,11 @@ public class Dice : MonoBehaviour, IDice
         };
 
         return rollValue;
+    }
+
+    private void NotifyDiceValueAvailable()
+    {
+        OnDiceReadyToRead?.Invoke(this);
     }
 
     public void Click()
