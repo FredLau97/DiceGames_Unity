@@ -5,97 +5,42 @@ using System.Threading;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class Dice : MonoBehaviour
+public class Dice : MonoBehaviour, IDice
 {
-    private Rigidbody rigidBody;
-    private Vector3 startPosition;
+    private DiceControls controls;
+    private DiceVisuals visuals;
+
     private DiceManager diceManager;
-    private bool hasCheckedValue;
-    private bool shouldCheckValue;
-    private Outline outline;
+    
 
-    private float ForwardForce => Random.Range(minForwardForce, maxForwardForce);
-    private float Torque => Random.Range(minTorque, maxTorque);
-
-    [SerializeField] private float minForwardForce, maxForwardForce, minTorque, maxTorque;
-
-    [field: SerializeField] public int DiceValue { get; private set; }
-
-    public delegate void AnnounceRoll(int rollValue);
-    public event AnnounceRoll OnAnnounceRoll;
+    private void OnEnable()
+    {
+        diceManager.OnRollDice += Roll;
+    }
+    
+    private void OnDisable()
+    {
+        diceManager.OnRollDice -= Roll;
+    }
 
     private void Awake()
     {
-        rigidBody = GetComponent<Rigidbody>();
         diceManager = DiceManager.Instance;
-        outline = GetComponent<Outline>();
-        outline.enabled = false;
-    }
-
-    private void Update()
-    {
-        if (!shouldCheckValue) return;
-        if (hasCheckedValue && rigidBody.velocity.magnitude == 0f) return;
-        if (rigidBody.velocity.magnitude > 0f)
-        {
-            hasCheckedValue = false;
-            return;
-        }
-        
-        CheckRoll();
+        controls = GetComponent<DiceControls>();
+        visuals = GetComponent<DiceVisuals>();
     }
 
     public void Initialize(Vector3 position)
     {
-        startPosition = position;
-        transform.position = startPosition;
-        transform.rotation = Random.rotation;
-        diceManager.OnRollDice += RollDice;
-        diceManager.OnResetDice += ResetPosition;
-        diceManager.OnEnableDiceOutline += EnableOutline;
-        diceManager.OnDisableDiceOutline += DisableOutline;
+        controls.SetStartPosition(position);
     }
 
-    private void OnDisable()
+    public void Roll()
     {
-        diceManager.OnRollDice -= RollDice;
-        diceManager.OnResetDice -= ResetPosition;
+        controls.Roll();
     }
 
-    private void RollDice()
-    {
-        RevertPhysics(true);
-        rigidBody.AddForce(Vector3.forward * ForwardForce, ForceMode.Impulse);
-        rigidBody.AddTorque(
-            transform.forward * Torque +
-            transform.up * Torque +
-            transform.right * Torque
-        );
-
-        StartCoroutine(EnableShouldCheckValue());
-    }
-
-    private IEnumerator EnableShouldCheckValue()
-    {
-        yield return new WaitForSeconds(.1f);
-        shouldCheckValue = true;
-    }
-
-    private void RevertPhysics(bool enable)
-    {
-        rigidBody.isKinematic = !enable;
-        rigidBody.useGravity = enable;
-    }
-
-    private void ResetPosition()
-    {
-        RevertPhysics(false);
-        DiceValue = 0;
-        transform.position = startPosition;
-        transform.rotation = Random.rotation;
-    }
-
-    private void CheckRoll()
+    public int GetRollValue()
     {
         float yDot, xDot, zDot;
         int rollValue = -1;
@@ -122,14 +67,12 @@ public class Dice : MonoBehaviour
             -1 => 1,
             _ => rollValue
         };
-        
-        DiceValue = rollValue;
-        shouldCheckValue = false;
-        hasCheckedValue = true;
-        OnAnnounceRoll?.Invoke(DiceValue);
+
+        return rollValue;
     }
 
-    private void EnableOutline() => outline.enabled = true;
-
-    private void DisableOutline() => outline.enabled = false;
+    public void Click()
+    {
+        visuals.ToggleOutline();
+    }
 }
