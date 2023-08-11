@@ -445,7 +445,7 @@ MonoBehaviour:
   - {fileID: 1077731445}
   - {fileID: 1638605490}
   - {fileID: 2079420215}
-  <NumberOfDice>k__BackingField: 6
+  <NumberOfDice>k__BackingField: 1
 --- !u!114 &601211732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1474,7 +1474,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2033670595}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: d728fd87ddd58ca43821d4b170d92da7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
