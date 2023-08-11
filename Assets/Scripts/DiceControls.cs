@@ -14,8 +14,8 @@ public class DiceControls : MonoBehaviour
     
     [SerializeField] private float minForwardForce, maxForwardForce, minTorque, maxTorque;
     
-    public float ForwardForce => Random.Range(minForwardForce, maxForwardForce);
-    public float Torque => Random.Range(minTorque, maxTorque);
+    private float forwardForce => Random.Range(minForwardForce, maxForwardForce);
+    private float torque => Random.Range(minTorque, maxTorque);
 
     private void OnEnable()
     {
@@ -48,11 +48,11 @@ public class DiceControls : MonoBehaviour
     {
         TogglePhysics();
         
-        rigidBody.AddForce(Vector3.forward * ForwardForce, ForceMode.Impulse);
+        rigidBody.AddForce(Vector3.forward * forwardForce, ForceMode.Impulse);
         rigidBody.AddTorque(
-            Vector3.forward * Torque +
-            // diceTransform.up * Torque +
-            Vector3.right * Torque
+            Vector3.forward * torque +
+            diceTransform.up * (torque * 0.25f) +
+            Vector3.right * torque
         );
     }
 
